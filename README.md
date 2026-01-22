@@ -248,5 +248,4 @@ docker exec -it rag_ollama ollama run qwen2.5:7b-instruct
 * [React Force Graph](https://github.com/vasturiano/react-force-graph)
 * [ChromaDB](https://www.trychroma.com/)
 * [LeetCode](https://leetcode.com/) (数据来源)
-
-```
+--- 
