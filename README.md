@@ -1,99 +1,154 @@
-# CloudComputer2025
-《智能体云原生开发》期末大作业需求说明书
-1. 作业目标
-本大作业要求大家综合运用云原生技术（Cloud Native）与大模型智能体（LLM Agents），构建一个具备实际应用价值的学习相关系统。重点考察大家对工程的理解与工程实现能力。
-2. 交付物
-1. 代码仓库（GitHub/GitLab）：包含 Dockerfile、依赖配置文件、完整源码及环境配置指南。
-2. 演示视频（3-5分钟）：录屏展示核心功能，并包含 1 分钟左右的架构讲解（需说明数据流向及云服务调用逻辑）。
-3. 技术文档（PDF/Word/MD都可以）：
-  - 架构设计：系统架构图及使用到的云原生组件（如 Docker、K8S、 Redis, Serverless、微服务等）, LLM Agent的工具链等。
-  - 分工说明：明确每位成员的贡献百分比及具体负责模块。
-  - 智能体策略：展示系统中关键的 Prompt 模板及其LLM Agent设计过程和工具链。
-给同学们的开发建议：
-1. 架构优先： 所有的命题体现“云原生”特征，避免单一脚本运行，使用容器化部署。
-2. 注重容错： 大模型存在幻觉，你的智能体设计要考虑校验环节（Check layer）。
-3. 分工明确： 建议组员分为“算法/Agent 组”和“架构/工程组”，在分工介绍中详细说明。
+
+# 📘 基于LeetCode和知识库的RAG知识问答以及自动出题系统  
+
+> 一个垂直领域的多模态检索增强生成 (Multimodal RAG) 系统，专注于 LeetCode 算法题目与计算机学术论文的智能解析与辅导。
+
+![Docker](https://img.shields.io/badge/Docker-Enabled-blue?logo=docker)
+![React](https://img.shields.io/badge/Frontend-React_18-61DAFB?logo=react)
+![FastAPI](https://img.shields.io/badge/Backend-FastAPI-009688?logo=fastapi)
+![Neo4j](https://img.shields.io/badge/GraphDB-Neo4j-008CC1?logo=neo4j)
+![Ollama](https://img.shields.io/badge/LLM-Ollama-000000)
+
+## 📖 项目简介 (Overview)
+
+本项目旨在解决传统算法刷题过程中**题目知识点碎片化**以及**通用大模型易产生幻觉**的痛点。
+
+通过构建**双路知识库**（向量库 + 图数据库），系统不仅能基于语义检索 LeetCode 题目和 PDF 论文，还能通过**知识图谱**可视化展示算法知识点（如：困难度 -> 标签 -> 题目）的层级关系。同时，引入了 **Check Layer (容错校验层)**，通过多重校验机制大幅提升了回答的准确性与可信度。
+
+### 🚀 核心能力
+*   **多模态 RAG**: 支持让 AI “看见” PDF 中的图表和 Markdown 中的本地图片引用。
+*   **双库协同**: ChromaDB 处理非结构化文本检索，Neo4j 处理结构化知识推理。
+*   **防幻觉校验**: 独创的三级校验机制（检索熔断、引用核查、质量过滤）。
+*   **沉浸式交互**: 支持 Markdown 表格、LaTeX 公式 ($O(n \log n)$) 及代码高亮的流式对话。
+*   **云原生架构**: 全系统容器化，支持 Docker Compose 一键部署。
 
 ---
-3. 命题详细说明
-命题一：PPT 内容扩展智能体 
-- 痛点场景： 考前复习只有干巴巴的 PPT 标题，缺乏背景细节和深度解释，导致自学效率低下。
-- 核心目标： 开发一个能“读懂” PPT 逻辑并自动查漏补缺的智能助手。
-- 输入要求： PPT 文件（本地上传或云端 URL）。
-- 至少包含下面功能清单：
-  - 语义解析： 识别 PPT 的层级结构（如目录、主标题、子标题、正文及图片描述）。
-  - 知识扩充： 针对每一页知识点，自动调用 LLM 或搜索工具补充原理说明、公式推导或代码示例。
-  - 多维搜索： 联动外部权威资源（如 Wikipedia, Arxiv, 学术 API）获取延伸阅读材料。
-- 云原生技术（仅参考）：
-  - 使用 Unstructured 或 PyMuPDF 进行文档解析。
-  - 使用 Vector Database（如 Milvus, Pinecone）存储 PPT 切片，实现基于语义的相关性检索。
-- 考核指标： 笔记的逻辑结构是否清晰；联想内容与原 PPT 内容的语义相关度。
+
+## 🛠 技术栈 (Tech Stack)
+
+| 模块 | 技术选型 | 说明 |
+| :--- | :--- | :--- |
+| **前端** | **React 18 + Vite** | 构建工具与框架 |
+| **UI/可视化** | Material UI / React Force Graph | 沉浸式对话与 2D 力导向图渲染 |
+| **后端** | **Python 3.10 + FastAPI** | 高性能异步 Web 微服务 |
+| **LLM 服务** | **Ollama** | 本地托管 Qwen2.5:7b-instruct 模型 |
+| **向量库** | **ChromaDB** | 本地持久化向量存储 |
+| **图数据库** | **Neo4j Desktop** | 存储算法知识图谱关系 |
+| **基础设施** | **Docker & Docker Compose** | 服务编排与容器化部署 |
 
 ---
-命题二：学习效果评估和巩固智能体 
-- 痛点场景： 学完新知识后缺乏客观的评估手段，无法发现自己的知识盲点。
-- 核心目标： 构建一个能基于学习资料自动出题、判卷并进行个性化纠偏的闭环系统。
-- 输入要求： 特定领域的教材、PDF 笔记或录音转写文本。
-- 至少包含下面功能清单：
-  - 动态出题： 根据资料自动生成选择题、简答题，并确保题目覆盖核心考点。
-  - 智能判卷： 分析用户输入的答案，不仅给出对错，更要给出详尽的解析。
-  - 弱点记忆： 自动收集用户高频错误，生成“错题本”。
-- 云原生技术（仅参考）：
-  - 使用 Redis 或 MongoDB 存储用户的学习状态和历史错题（持久化记忆）。
-  - 利用 LLM 评估模式（如 Prometheus 提示词法）以及Agent的一些策略提高判卷的公平性。
-- 考核指标： 出题的难度梯度是否合理；针对错题的“小灶”建议是否有针对性。
+
+## 🏗 系统架构 (Architecture)
+
+系统采用 **云原生分层架构**，所有模块均封装为独立 Docker 容器。
+
+```mermaid
+graph TD
+    User[用户 Browser] -->|HTTP| Nginx[前端网关]
+    Nginx --> React[前端 UI]
+    React -->|API Request| FastAPI[后端 API (Port: 8088)]
+    
+    subgraph "Agentic Workflow"
+        FastAPI --> Checker[🛡️ 容错校验层]
+        Checker -->|Query| Chroma[(ChromaDB 向量库)]
+        Checker -->|Cypher| Neo4j[(Neo4j 图数据库)]
+        Chroma -->|Context| Ollama[Ollama LLM]
+    end
+````
+
+### 🛡️ 容错校验层 (Check Layer)
+
+为了解决幻觉问题，系统在 `checker.py` 中实现了三级护栏：
+
+1. **检索层熔断**: 若无向量召回，直接拦截，拒绝编造。
+2. **引用合规性检查**: 强制检查回答中是否包含 `[evidence_id]` 证据链。
+3. **启发式质量过滤**: 过滤过短或复读式回答。
 
 ---
-命题三：跨学科知识图谱智能体
-- 痛点场景： 知识碎片化严重，难以看透不同学科间（如神经科学与深度学习）的内在关联。例如学习“神经网络”时，不知道它和“生物学”或“高等数学”到底有什么深层联系。
-- 核心目标： 利用智能体挖掘跨领域概念的桥梁，并构建可视化的知识图谱。
-- 输入要求： 一个核心概念词（例如“熵”、“最小二乘法”）。
-- 至少包含下面功能清单：
-  - 关联挖掘： 强制 Agent 在不同学科领域（数学、物理、社会学等）寻找相关概念。
-  - 图谱构建： 提取实体及其关系，生成标准的节点/边数据结构（JSON）。
-  - 动态可视化： 在 Web 端渲染可交互的跨学科知识网。
-- 云原生技术（仅参考）：
-  - 后端使用 Neo4j 图数据库或轻量级图形数据结构存储关系。
-  - 前端使用 D3.js 或 Echarts 进行关系拓扑展示。
-- 考核指标： 发现“远亲概念”的逻辑合理性；图谱展示的直观性。
+
+## 📂 项目结构 (Directory Structure)
+
+```text
+rag/
+├── deploy/                     # [云原生] 容器化部署配置
+│   ├── docker-compose.yml      # 服务编排
+│   ├── backend.Dockerfile      # 后端镜像构建
+│   └── frontend.Dockerfile     # 前端镜像构建
+├── data/                       # [ETL数据] 清洗后的 JSONL 与提取的图片
+├── docs/                       # [源数据] LeetCode Markdown 题目库
+├── frontend/                   # [前端源码] React + MUI + ForceGraph
+├── index/                      # [索引] Chroma 向量索引文件
+├── scripts/                    # [流水线] 爬虫、多模态解析、建库脚本
+└── services/
+    └── agent/
+        ├── core/checker.py     # [核心] 幻觉校验模块
+        └── rag_demo.py         # [入口] FastAPI 主程序
+```
 
 ---
-命题四：行研雷达智能体——增量追踪与更新
-- 痛点场景： 行业报告时效性极差，传统报告往往“生成即过时”，无法应对瞬息万变的市场。
-- 核心目标： 开发一个具备定时巡检、增量比对和冲突报警功能的动态监控智能体。
-- 输入要求： 初始行研报告或行业核心关键词。
-- 至少包含下面功能清单：
-  - 自动巡检： 利用云端定时器实现 24 小时自动全网资讯抓取。
-  - 增量对比： 比对“新发现”与“旧结论”，识别数据变化（如预测增长率从 5% 调至 2%）。
-  - 冲突仲裁： 当信息源冲突时，根据来源优先级（官方 > 媒体 > 传闻）自动判定可信度。
-- 云原生技术（仅参考）：
-  - 使用 Serverless Functions（如 AWS Lambda, 阿里云 FC）配合 Cron Triggers。
-  - 使用 Object Storage (S3/OSS) 存储报告版本历史。
-- 考核指标： 能否准确识别并高亮显示关键数据的变动；定时任务的稳定性。
+
+## 🚀 快速开始 (Getting Started)
+
+### 前置要求
+
+* Docker & Docker Desktop
+
+### 1. 启动服务
+
+在项目根目录下，使用 Docker Compose 一键启动所有服务（前端、后端、数据库、模型服务）：
+
+```bash
+docker-compose -f deploy/docker-compose.yml up -d --build
+```
+
+### 2. 下载模型
+
+容器启动后，需要进入 Ollama 容器下载 Qwen2.5 模型：
+
+```bash
+docker exec -it rag_ollama ollama run qwen2.5:7b-instruct
+```
+
+### 3. 访问系统
+
+* **Web 界面**: [http://localhost:5173](http://localhost:5173)
+* **后端 API 文档**: [http://localhost:8088/docs](http://localhost:8088/docs)
+* **Neo4j 控制台**: [http://localhost:7474](http://localhost:7474) (账号: `neo4j` / 密码: `password123`)
 
 ---
-命题五：长文本“事实卫士”智能体
-- 痛点场景： 长文档（如毕业论文、可行性报告）多人协同或分章节生成时，极易出现逻辑自相矛盾。
-- 核心目标： 构建一个作为“中间件”的校验智能体，确保长文档事实的一致性。
-- 输入要求： 5000 字以上的长文档内容。
-- 至少包含下面功能清单：
-  - 事实提取： 自动提取文中的关键事实（数据、日期、结论、人名）。
-  - 冲突检测： 扫描全文，发现并高亮前后不统一的描述（如第一章和第五章对同一数据的引用冲突）。
-  - 溯源校验： 自动联网核实冲突事实的真实来源，并给出修正建议。
-- 云原生技术（仅参考）：
-  - 使用 Redis 作为“事实黑板” 实现并发状态下的统一事实注册。
-  - 实现结果的可视化分析仪表盘（Dashboard）。
-- 考核指标： 冲突查杀的准确率；对重复内容和逻辑矛盾的识别广度。
+
+## 📊 数据工程 (Data Engineering)
+
+本项目包含完整的数据处理流水线：
+
+1. **爬虫**: `leetcode-crawler.py` 爬取近 10000 条题目并转为 Markdown。
+2. **多模态解析**: `parse_pdf_multimodal.py` 解析 PDF 表格及 Markdown 图片引用。
+3. **向量化**: `build_index_ollama.py` 使用 `nomic-embed-text` 构建索引。
+4. **图谱构建**: `build_leetcode_graph.py` 提取元数据构建知识图谱。
 
 ---
-4. 评分标准（总分 100）
-不卷代码行数，也不卷文档长度，希望大家真正从下面几个点做出有价值的东西：
-- 技术架构（30%）：是否合理使用了云原生组件，系统是否考虑了稳定性和扩展性。
-- 智能逻辑（30%）：工程架构，Prompt 工程、推理链路（CoT）、事实准确性等，提示词是否严谨，Agent 是否能处理异常输入或模型幻觉。
-- 工程质量（20%）：代码规范、README、Dockerfile、分工文档，是否能让老师看得懂。
-- 演示效果（20%）：视频讲解清晰度、场景解决的痛点深度Demo 演示是否流畅。
-扣分项与警戒线
-  - 硬伤扣分 ( -10~20分)：  代码无法在 Docker 或标准环境中运行成功。
-  - 严重违规 ( 取消成绩)： 
-    - 抄袭他人已有开源项目且未注明引用。
-    - 分工文档造假。
+
+## 👥 作者与贡献 (Author)
+
+
+本项目工作量涵盖以下四个维度：
+
+* **云原生架构设计**: Docker 容器化配置、Docker Compose 服务编排、K8s 适配性方案预研。
+* **智能体策略开发**: Prompt 工程设计、RAG 推理链路 (CoT) 优化、容错校验层 (Checker) 开发。
+* **全栈工程开发**: React 可视化前端开发、FastAPI 后端微服务开发。
+* **数据流水线建设**: 爬虫工程化、多模态数据清洗、知识库构建脚本编写。
+
+---
+
+## 📜 致谢 (Acknowledgments)
+
+本项目在开发过程中使用了以下开源项目：
+
+* [Ollama](https://ollama.com/)
+* [LangChain](https://www.langchain.com/)
+* [React Force Graph](https://github.com/vasturiano/react-force-graph)
+* [ChromaDB](https://www.trychroma.com/)
+* [LeetCode](https://leetcode.com/) (数据来源)
+
+```
+```
