@@ -44,16 +44,115 @@
 
 ```mermaid
 graph TD
-    User[用户 Browser] -->|HTTP| Nginx[前端网关]
-    Nginx --> React[前端 UI]
-    React -->|API Request| FastAPI[后端 API (Port: 8088)]
-    
-    subgraph "Agentic Workflow"
-        FastAPI --> Checker[🛡️ 容错校验层]
-        Checker -->|Query| Chroma[(ChromaDB 向量库)]
-        Checker -->|Cypher| Neo4j[(Neo4j 图数据库)]
-        Chroma -->|Context| Ollama[Ollama LLM]
+    %% =======================
+    %% 0. 容器编排层 (新增)
+    %% =======================
+    Orch[容器编排层]
+    Orch -->|一键启动| DC[docker-compose.yml]
+    DC -.->|编排| B
+    DC -.->|编排| C
+    DC -.->|编排| D
+    DC -.->|编排| E
+    DC -.->|编排| F
+    DC -.->|编排| G
+
+    %% =======================
+    %% 1. 客户端层
+    %% =======================
+    A[客户端层 User/Browser] -->|HTTP/WS| C
+
+    %% =======================
+    %% 2. 前端服务层
+    %% =======================
+    subgraph Frontend_Layer [前端服务层]
+        direction TB
+        Conf_Front[frontend.Dockerfile] -.->|Build| B[前端容器 React App]
+        B -->|React 18 + Vite + MUI| B1[Chat组件 & GraphView组件]
     end
+
+    %% =======================
+    %% 3. 网关层
+    %% =======================
+    subgraph Gateway_Layer [网关层]
+        Conf_Nginx[nginx.conf] -.->|Config| C[反向代理容器 Nginx]
+        C -->|静态资源托管| B
+        C -->|API 转发 :8088| D
+    end
+
+    %% =======================
+    %% 4. 后端业务层 (核心)
+    %% =======================
+    subgraph Backend_Layer [后端业务层]
+        direction TB
+        Conf_Back[backend.Dockerfile] -.->|Build| D[后端容器 FastAPI + Uvicorn]
+        
+        D --> D_Logic[RAG Agent 核心逻辑]
+        
+        subgraph Agent_Module [Agentic Workflow]
+            D_Logic --> D1[Prompt工程]
+            D1 -->|CoT 推理| D2[LLM 交互]
+            
+            %% 新增 checker.py 位置
+            D2 --> D3[容错校验层 Guardrails]
+            D3 -->|核心实现| D3_Code[agent/core/checker.py]
+            D3_Code -->|1.检索熔断| Check1[无上下文拦截]
+            D3_Code -->|2.引用核查| Check2[Evidence ID正则匹配]
+            D3_Code -->|3.质量过滤| Check3[回复长度/拒答检测]
+        end
+    end
+
+    %% =======================
+    %% 5. 模型与存储层 (Infra)
+    %% =======================
+    D -->|API Call| E[LLM服务容器 Ollama]
+    E --> E1[Qwen2.5:7b-instruct 推理]
+    E --> E2[Nomic-embed-text 向量化]
+
+    D_Logic -->|Query| F[向量库容器 ChromaDB]
+    D_Logic -->|Cypher| G[图数据库容器 Neo4j]
+    
+    F --> F1[非结构化数据<br/>PDF/MD/图片描述]
+    G --> G1[结构化知识图谱<br/>难度-标签-题目关系]
+
+    %% =======================
+    %% 6. 数据处理流水线
+    %% =======================
+    subgraph Data_Pipeline [离线数据处理层]
+        H[Python 脚本集 scripts/]
+        H --> H1[爬虫: leetcode-crawler.py]
+        H --> H2[多模态解析: parse_pdf_multimodal.py]
+        H --> H3[向量建库: build_index_ollama.py]
+        H --> H4[图谱构建: build_leetcode_graph.py]
+    end
+    
+    H -.->|写入| F
+    H -.->|写入| G
+
+    %% =======================
+    %% 7. 数据源
+    %% =======================
+    H --> I[原始数据源 data/ & docs/]
+    I --> I1[LeetCode HTML]
+    I --> I2[学术论文 PDF]
+    I --> I3[本地图片资源 assets]
+
+    %% =======================
+    %% 样式定义
+    %% =======================
+    classDef orchestration fill:#212121,stroke:#000,stroke-width:2px,color:#fff;
+    classDef config fill:#ffecb3,stroke:#ff6f00,stroke-width:2px,stroke-dasharray: 5 5;
+    classDef container fill:#e1f5fe,stroke:#01579b,stroke-width:2px;
+    classDef logic fill:#f3e5f5,stroke:#4a148c,stroke-width:2px;
+    classDef storage fill:#e8f5e8,stroke:#1b5e20,stroke-width:2px;
+    classDef codeFile fill:#fff3e0,stroke:#bf360c,stroke-width:2px;
+
+    class DC orchestration;
+    class Conf_Front,Conf_Nginx,Conf_Back config;
+    class B,C,D,E,F,G container;
+    class D1,D2,D3 logic;
+    class D3_Code codeFile;
+    class F1,G1 storage;
+
 ````
 
 ### 🛡️ 容错校验层 (Check Layer)
