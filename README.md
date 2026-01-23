@@ -64,47 +64,7 @@
 
 ## 🏗 系统架构
 
-```mermaid
-graph TD
-    User[用户 / 浏览器] -->|HTTPS / WebSocket| Nginx[Nginx 反向代理]
 
-    subgraph 前端层
-        Nginx --> React[React 18 + Vite / Ant Design / Material UI]
-        React --> Chat[沉浸式对话 + Markdown + LaTeX]
-        React --> Graph[知识图谱 • ForceGraph / D3.js]
-        React --> Editor[Monaco Editor 代码练习]
-    end
-
-    Nginx --> FastAPI[FastAPI 异步后端]
-
-    subgraph Agent 与 RAG 核心
-        FastAPI --> Agentic[多智能体工作流]
-        Agentic --> Checker[三级防幻觉校验层]
-        Checker --> LLM[LLM 服务：Qwen / 通义千问 / Ollama]
-        FastAPI --> RAG[RAG 检索：ChromaDB + 多模态]
-        FastAPI --> GraphDB[Neo4j 知识图谱]
-    end
-
-    subgraph 存储层
-        MongoDB[(MongoDB)] --> FastAPI
-        Redis[(Redis)] --> FastAPI
-        Chroma[(ChromaDB 向量库)] --> RAG
-        Neo4j[(Neo4j 图库)] --> GraphDB
-    end
-
-    subgraph 数据处理流水线
-        Scripts[ETL 脚本：爬虫 / PDF 多模态解析 / 建图] --> Chroma
-        Scripts --> Neo4j
-    end
-
-    classDef frontend fill:#e3f2fd,stroke:#1565c0
-    classDef backend fill:#f3e5f5,stroke:#6a1b9a
-    classDef storage fill:#e8f5e8,stroke:#2e7d32
-    classDef agent fill:#fff3e0,stroke:#ef6c00
-
-    class React,Chat,Graph,Editor frontend
-    class FastAPI,Agentic,Checker,RAG frontend
-    class MongoDB,Redis,Chroma,Neo4j storage
 
 ## 🎨 前端展示（UI/UX 设计与页面构成）
 
