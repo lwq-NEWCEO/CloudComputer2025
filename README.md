@@ -72,12 +72,18 @@
 
 ### 主要页面与功能预览
 
+#### （详细介绍和效果展示请移步技术文档）
+
+
 1. **仪表盘 / 学习概览**  
    - 知识掌握度环形图 / 知识点热力图  
    - 最近错题 Top 5（可点击快速复习）  
    - 推荐学习路径（卡片流 / 时间轴式）  
    - 今日学习统计（学习时长 / 完成题量 / 正确率趋势）
+   - 
   <img width="1836" height="1043" alt="image" src="https://github.com/user-attachments/assets/715a01a5-0170-43e2-9dbb-f612f0b0c9aa" />
+  
+<img width="2555" height="1453" alt="fe2910d7d4f16b1d6189fe6933c5da0b" src="https://github.com/user-attachments/assets/772af6d6-2ac6-45fb-a451-f351738a4153" />
 
 
 2. **知识库管理**  
