@@ -292,3 +292,27 @@ docker compose up -d --build
 API 文档：http://localhost:8000/docs 或 http://localhost:8088/docs
 Neo4j Browser：http://localhost:7474 （默认账号 neo4j / 密码 password123）
 
+---
+
+## 👥 贡献 
+
+
+本项目工作量涵盖以下四个维度：
+
+* **云原生架构设计**: Docker 容器化配置、Docker Compose 服务编排、K8s 适配性方案预研。
+* **智能体策略开发**: Prompt 工程设计、RAG 推理链路 (CoT) 优化、容错校验层 (Checker) 开发。
+* **全栈工程开发**: React 可视化前端开发、FastAPI 后端微服务开发。
+* **数据流水线建设**: 爬虫工程化、多模态数据清洗、知识库构建脚本编写。
+
+---
+
+## 📜 致谢
+
+本项目在开发过程中使用了以下开源项目：
+
+* [Ollama](https://ollama.com/)
+* [LangChain](https://www.langchain.com/)
+* [React Force Graph](https://github.com/vasturiano/react-force-graph)
+* [ChromaDB](https://www.trychroma.com/)
+* [LeetCode](https://leetcode.com/) (数据来源)
+--- 
