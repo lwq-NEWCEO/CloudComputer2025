@@ -77,6 +77,8 @@
    - 最近错题 Top 5（可点击快速复习）  
    - 推荐学习路径（卡片流 / 时间轴式）  
    - 今日学习统计（学习时长 / 完成题量 / 正确率趋势）
+  <img width="1836" height="1043" alt="image" src="https://github.com/user-attachments/assets/715a01a5-0170-43e2-9dbb-f612f0b0c9aa" />
+
 
 2. **知识库管理**  
    - 支持拖拽上传 PDF / Markdown / TXT / 图片  
