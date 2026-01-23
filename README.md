@@ -15,7 +15,91 @@
 | 人员/账号       | 核心职责                                                                                                                                                                                                 | 负责文件/模块范围                                                                                                                                                                                                 |
 |----------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | lwq-NEWCEO（罗文琦） | 1. **智能体策略与 RAG 核心逻辑**：独立设计全套 Prompt 模板（问答/难度梯度出题/元认知校验）、实现 CoT 思维链推理链路、开发 SafetyChecker 容错校验层（checker.py）解决大模型幻觉问题；<br>2. **云原生架构实施**：完成全系统 Docker 容器化封装（编写 Dockerfile/docker-compose.yml）、落地前后端分离微服务架构（Nginx 反向代理+FastAPI 异步服务）；<br>3. **前端可视化开发**：开发支持 Markdown/LaTeX 渲染的 Chat 组件（流式响应+多模态展示）、基于 React Force Graph 的动态知识图谱组件（节点拖拽/缩放/点击交互）；<br>4. **数据工程与交付**：重构 LeetCode 爬虫/多模态解析/向量库/图谱建库脚本、编写 GitHub README 与 Demo 视频素材；<br>5. **知识库与问答系统搭建**：构建 ChromaDB 向量库+Neo4j 图数据库双路知识库、实现 RAG 知识问答系统与难度梯度智能出题功能 | `scripts/` 目录：<br>  - leetcode-crawler.py（LeetCode 题目爬取+MD 转换）<br>  - parse_pdf_multimodal.py（PDF/MD 解析+图片处理+生成 parsed_docs.jsonl）<br>  - build_index_ollama.py（调用 Nomic-embed-text 生成向量+ChromaDB 建库）<br>  - build_leetcode_graph.py（MD 元数据提取+Neo4j 图谱构建）<br><br>`services/agent/` 目录：<br>  - checker.py（SafetyChecker 容错校验层核心代码）<br>  - rag_demo.py（FastAPI 后端入口+静态资源挂载+API 接口实现）<br><br>`frontend/src/components/` 目录：<br>  - Chat.tsx（沉浸式对话组件：Markdown/KaTeX 渲染+代码高亮+引用展示）<br>  - GraphView.tsx（知识图谱可视化组件：响应式布局+节点交互）<br><br>其他核心目录/文件：<br>  - `index/chroma/`（ChromaDB 向量存储持久化目录）<br>  - `docs/`（LeetCode 题目 MD 源文件+本地图片存储，按 easy/mid/hard 分类）<br>  - `data/`（parsed_docs.jsonl 中间数据+extracted_images 解析图片归档）<br>  - 项目根目录：Dockerfile、docker-compose.yml（容器化配置）、README.md（项目文档） |
-| 孙嘉 | 其余部分前后端编写，包括智能出题、多维度智能判卷、知识图谱可视化、 错题本 & 针对性推荐、主页面                                                        | 其余文件 |
+| 孙嘉 | 其余部分前后端编写，包括智能出题、多维度智能判卷、知识图谱可视化、 错题本 & 针对性推荐、主页面                                                        
+1. 后端核心业务服务开发：
+- 实现智能出题核心逻辑，基于知识库知识点与用户薄弱点匹配，支持单选 / 简答 / 代码等多题型生成，衔接题目生成 Agent 工具链（RAG 检索、难度评估、题目验证）；
+- 落地多维度智能判卷服务，基于 Prometheus 评估法（准确性 40%+ 完整性 30%+ 清晰度 20%+ 深度 10%），实现主评分、审核评分、反馈生成的多 Agent 协作评分流程；
+- 开发错题本服务，实现答题记录存储、错题分类、错题回顾功能，支撑薄弱点分析数据来源；
+- 构建针对性推荐算法，基于用户错题统计与知识点掌握度，生成个性化学习路径与强化练习题；
+- 完善 RAG 检索服务集成，衔接 ChromaDB 向量检索与业务逻辑，确保题目生成、智能答疑的知识准确性；
+2. API 接口与数据模型设计：
+- 开发并完善 FastAPI 路由接口，覆盖认证授权、文件上传、题目生成、自动判卷、知识图谱、AI 对话、错题本全业务场景；
+- 定义 MongoDB 数据模型，包括用户数据、题目库、答题记录、错题本、知识点等核心数据结构，实现数据增删改查与聚合分析；
+- 保障接口安全性与稳定性，集成 JWT 认证、请求验证、异常处理机制；
+3. 前端功能页面与交互实现：
+- 开发系统主页面，整合各功能模块入口，实现响应式布局与多端适配；
+- 构建答题页面，支持多题型展示、答案提交、实时评分结果展示功能；
+- 实现错题本页面，包含错题列表、错题详情、错题分类筛选、重新作答功能；
+- 开发知识点统计页面，展示知识点掌握度、薄弱点分布，衔接知识图谱可视化数据；
+- 完善前端组件化开发，补充答题组件、评分结果展示组件、错题卡片组件等非可视化核心 UI 组件；
+4. 系统集成与联调优化：
+- 实现前后端数据交互，封装 Axios 请求拦截器，对接后端所有 API 接口，处理数据格式转换与状态管理；
+- 协同知识图谱可视化组件（GraphView.tsx）开发，提供 Neo4j 图谱数据查询与格式适配接口，支撑节点拖拽、缩放、点击交互功能；
+- 整合通义千问 API 调用逻辑，确保大模型在出题、判卷、对话场景的稳定调用，配合 SafetyChecker 容错校验层减少幻觉问题；
+- 参与系统联调与测试，修复功能漏洞，优化接口响应速度与用户交互体验；
+5. 辅助功能与配置开发：
+- 编写系统配置文件，包括数据库连接参数、API 密钥管理、模型参数（如通义千问 temperature 值）配置；
+- 开发后端工具函数，涵盖文本处理、向量转换、权限验证、数据格式化等通用功能；
+- 支持数据同步与备份，确保 MongoDB、ChromaDB、Neo4j 多数据库数据一致性	后端相关目录 / 文件：
+- backend/app/routes/：
+- auth.py（认证授权接口）
+- upload.py（文件上传接口）
+- questions.py（题目生成接口）
+- grading.py（自动判卷接口）
+- knowledge.py（知识图谱接口）
+- chat.py（AI 对话接口）
+- errorbook.py（错题本接口）
+- backend/app/services/：
+- question_generator.py（题目生成服务核心逻辑）
+- grading_service.py（判卷服务及多 Agent 协作逻辑）
+- rag_service.py（RAG 检索服务业务衔接逻辑）
+- knowledge_graph.py（知识图谱服务辅助接口）
+- chat_service.py（AI 对话服务逻辑）
+- errorbook_service.py（错题本服务逻辑）
+- backend/app/models/：
+- user.py（用户数据模型）
+- question.py（题目数据模型）
+- answer_record.py（答题记录模型）
+- errorbook.py（错题本数据模型）
+- knowledge_point.py（知识点数据模型）
+- backend/app/config/：
+- database.py（数据库连接配置）
+- auth.py（JWT 认证配置）
+- llm.py（通义千问 API 配置）
+- settings.py（系统通用设置）
+- backend/app/utils/：
+- text_processing.py（文本处理工具）
+- vector_utils.py（向量转换工具）
+- auth_utils.py（权限验证工具）
+- data_formatter.py（数据格式化工具）
+- error_handler.py（异常处理工具）
+前端相关目录 / 文件：
+- frontend/src/views/：
+- Home.tsx（系统主页面）
+- ExamPage.tsx（答题页面）
+- ErrorBookPage.tsx（错题本页面）
+- KnowledgeStatsPage.tsx（知识点统计页面）
+- LoginPage.tsx（登录页面）
+- frontend/src/components/：
+- QuestionCard.tsx（题目展示组件）
+- AnswerSubmit.tsx（答案提交组件）
+- ScoreResult.tsx（评分结果展示组件）
+- ErrorCard.tsx（错题卡片组件）
+- WeakPointList.tsx（薄弱点列表组件）
+- RecommendQuestionList.tsx（推荐题目列表组件）
+- frontend/src/routes/：
+- routeConfig.tsx（系统路由配置补充与优化）
+- frontend/src/services/：
+- api.ts（前后端交互 API 封装补充，含答题、判卷、错题本等接口）
+- frontend/src/store/：
+- examStore.ts（答题状态管理）
+- errorBookStore.ts（错题本状态管理）
+- userStore.ts（用户状态管理）
+其他相关文件：
+- tests/：
+- backend/（后端接口单元测试、集成测试脚本）
+- frontend/（前端组件测试、页面交互测试脚本）
+- docs/api/（API 接口文档编写与维护）
 
 
 
